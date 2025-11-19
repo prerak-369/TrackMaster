@@ -1,429 +1,661 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KMRL AI Operations Command Center</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@0.292.0/dist/umd/lucide.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* KMRL-Inspired Dark Palette */
-    :root {
-      --background-dark: #0D1117; /* Deep Charcoal */
-      --primary-dark: #1A202C;    /* Slightly Lighter Card/Container Background */
-      --border-dark: #30363D;     /* Subtle Border */
-      --text-primary: #FFFFFF;    /* Pure White for Titles */
-      --text-secondary: #A0AEC0;  /* Light Grey for subtitles */
-      --accent-cyan: #00BFA5;     /* KMRL Aqua/Teal - New primary branding color */
-      --accent-green: #38A169;    /* Status Operational Green */
-      --accent-yellow: #ECC94B;    /* Status Maintenance Yellow */
-      --accent-blue: #4299E1;     /* Blue for Cleaning/Branding */
-      --accent-red: #E53E3E;      /* Critical Red */
-    }
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--background-dark);
-      color: var(--text-primary);
-    }
-    /* Custom glow effects for card statuses using the new palette */
-    .card-glow-green { box-shadow: 0 0 15px rgba(56, 161, 105, 0.4); }
-    .card-glow-yellow { box-shadow: 0 0 15px rgba(236, 201, 75, 0.4); }
-    .card-glow-blue { box-shadow: 0 0 15px rgba(66, 153, 225, 0.4); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuralTrack v4.0: Government Ops</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-    /* Custom scrollbar for better aesthetics in dark mode modals */
-    .modal-content::-webkit-scrollbar { width: 8px; }
-    .modal-content::-webkit-scrollbar-track { background: #222; border-radius: 10px; }
-    .modal-content::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 10px; }
-    .modal-content::-webkit-scrollbar-thumb:hover { background: #555; }
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: rgba(15, 23, 42, 0.95);
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-gold: #f59e0b;
+        }
 
-    /* Ticker styles for continuous updates feed */
-    .ticker-wrap {
-        overflow: hidden;
-        background-color: rgba(0,0,0,0.2);
-        padding: 1rem 0;
-        border-top: 1px solid var(--border-dark);
-        border-bottom: 1px solid var(--border-dark);
-    }
-    .ticker {
-        display: inline-block;
-        white-space: nowrap;
-        animation: ticker 40s linear infinite;
-    }
-    .ticker-item {
-        display: inline-block;
-        padding: 0 2rem;
-        color: var(--text-secondary);
-    }
-    .ticker-item-icon {
-        display: inline-block;
-        vertical-align: middle;
-        margin-right: 0.5rem;
-    }
-    @keyframes ticker {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-  </style>
-</head>
-<body class="antialiased">
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+            overflow: hidden;
+            user-select: none;
+        }
 
-  <header class="bg-primary-dark/90 backdrop-blur-sm border-b-4 border-accent-cyan sticky top-0 z-40 shadow-xl">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-4">
-        <svg class="w-10 h-10" style="color: var(--accent-cyan);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.23018 5.74312C3.35198 4.74495 4.19515 4 5.20235 4H18.7977C19.8049 4 20.648 4.74495 20.7698 5.74312L21.933 15.7431C22.0911 17.0393 21.0827 18.204 19.782 18.204H18V20C18 20.5523 17.5523 21 17 21C16.4477 21 16 20.5523 16 20V18.204H8V20C8 20.5523 7.55228 21 7 21C6.44772 21 6 20.5523 6 20V18.204H4.21804C2.91732 18.204 1.90892 17.0393 2.06699 15.7431L3.23018 5.74312ZM5.43335 6L4.45318 14.2064C4.38029 14.8085 4.82137 15.3197 5.42628 15.3197H18.5738C19.1787 15.3197 19.6198 14.8085 19.5469 14.2064L18.5667 6H5.43335ZM8 8H16V10H8V8Z"></path></svg>
-        <h1 class="text-2xl font-extrabold text-text-primary uppercase tracking-wider">KMRL OPERATIONS</h1>
-      </div>
-      <div class="text-right">
-        <p class="text-sm text-text-secondary">Last AI Sync:</p>
-        <p id="lastUpdated" class="font-semibold text-text-primary">Initializing...</p>
-      </div>
-    </div>
-  </header>
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
 
-  <section class="container mx-auto px-6 py-12">
-    <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-12">
-      <div>
-        <h2 class="text-5xl font-bold mb-4" style="color: var(--accent-cyan);">AI-Driven Fleet Command Center</h2>
-        <p class="text-lg text-text-secondary mb-6">Real-time monitoring and predictive maintenance for the entire KMRL fleet. All operational factors analyzed and optimized continuously.</p>
-        <button id="aiButton" onclick="runAiUpdate()" class="flex items-center space-x-2 font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out" style="background-color: var(--accent-cyan); color: var(--primary-dark);" onmouseover="this.style.opacity='0.9';" onmouseout="this.style.opacity='1';">
-          <svg id="aiIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-          <span id="aiButtonText" class="font-extrabold">Force AI Sync</span>
-        </button>
-      </div>
-      <div class="grid grid-cols-3 gap-4">
-          <div class="bg-primary-dark border border-border-dark p-4 rounded-xl text-center transform -rotate-3 hover:rotate-0 transition-transform">
-              <p class="text-sm text-text-secondary">Operational</p>
-              <h3 class="text-4xl font-bold" style="color: var(--accent-green);" id="operationalCount">...</h3>
-          </div>
-          <div class="bg-primary-dark border border-border-dark p-4 rounded-xl text-center mt-6">
-              <p class="text-sm text-text-secondary">Maintenance</p>
-              <h3 class="text-4xl font-bold" style="color: var(--accent-yellow);" id="maintenanceCount">...</h3>
-          </div>
-          <div class="bg-primary-dark border border-border-dark p-4 rounded-xl text-center transform rotate-3 hover:rotate-0 transition-transform">
-              <p class="text-sm text-text-secondary">Critical Alerts</p>
-              <h3 class="text-4xl font-bold" style="color: var(--accent-red);" id="alertsCount">...</h3>
-          </div>
-      </div>
-    </div>
-  </section>
+        .mono-font { font-family: 'JetBrains Mono', monospace; }
 
-  <div class="ticker-wrap mb-12">
-        <div class="ticker" id="ticker-content">
-             </div>
-    </div>
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
 
+        .train-card { transition: all 0.2s ease; border-left: 3px solid transparent; }
+        .train-card.selected { background: rgba(59, 130, 246, 0.2); border-left: 3px solid #3b82f6; }
+        .train-card:hover { background: rgba(255,255,255,0.05); }
 
-  <main class="container mx-auto p-6">
-     <h3 class="text-3xl font-bold mb-8 text-center uppercase tracking-wider text-text-secondary">Fleet Grid</h3>
-    <div id="trainGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-      </div>
-  </main>
+        #canvas-container { position: relative; overflow: hidden; cursor: crosshair; }
 
-  <div id="modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0">
-    <div id="modal-box" class="modal-content bg-primary-dark border border-border-dark rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto relative transform scale-95 transition-transform duration-300">
-        </div>
-  </div>
+        #train-tooltip {
+            position: absolute; pointer-events: none; z-index: 50;
+            transition: opacity 0.1s ease; opacity: 0;
+            transform: translate(15px, 15px);
+        }
 
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
 
-  <script>
-    // Utility function to dynamically create Lucide SVG icons
-    const createIcon = (name, options = {}) => {
-        const { color = 'currentColor', size = 20, className = '' } = options;
-        const iconNode = lucide.createElement(lucide[name]);
-        const svg = new XMLSerializer().serializeToString(iconNode);
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = svg;
-        const svgElement = wrapper.firstChild;
-        svgElement.setAttribute('stroke', color);
-        svgElement.setAttribute('width', size);
-        svgElement.setAttribute('height', size);
-        if (className) svgElement.classList.add(...className.split(' '));
-        return svgElement.outerHTML;
-    };
+        .status-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .status-normal { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .status-refuge { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+        .status-emergency { background: rgba(239, 68, 68, 0.2); color: #f87171; animation: flash 1s infinite; }
 
-    // Define train statuses and associated styling
-    const statuses = {
-        good: { label: "Operational", color: "green", icon: "CheckCircle", cardGlowClass: 'card-glow-green' },
-        clean: { label: "Needs Cleaning", color: "blue", icon: "Droplets", cardGlowClass: 'card-glow-blue' },
-        work: { label: "Maintenance", color: "yellow", icon: "Wrench", cardGlowClass: 'card-glow-yellow' }
-    };
-    
-    let trainData = [];
-
-    // --- DOM ELEMENT REFERENCES ---
-    const grid = document.getElementById('trainGrid');
-    const modal = document.getElementById('modal');
-    const modalBox = document.getElementById('modal-box');
-    const lastUpdatedEl = document.getElementById('lastUpdated');
-    const aiButton = document.getElementById('aiButton');
-    const aiButtonText = document.getElementById('aiButtonText');
-    const aiIcon = document.getElementById('aiIcon');
-    const operationalCountEl = document.getElementById('operationalCount');
-    const maintenanceCountEl = document.getElementById('maintenanceCount');
-    const alertsCountEl = document.getElementById('alertsCount');
-    const tickerContentEl = document.getElementById('ticker-content');
-    
-    // --- INITIAL DATA GENERATION ---
-    function generateInitialData() {
-        trainData = Array.from({ length: 25 }, (_, i) => {
-            const hasBranding = Math.random() < 0.2;
-            const openJobs = Math.floor(Math.random() * 4);
-            const initialMileage = Math.floor(5000 + Math.random() * 80000);
-            
-            // Standard check interval for this fleet is 90,000 km.
-            const CHECK_INTERVAL = 90000; 
-            // Calculate the next major check milestone based on current mileage
-            const milestoneMultiplier = Math.floor(initialMileage / CHECK_INTERVAL) + 1;
-            const nextMajorCheck = milestoneMultiplier * CHECK_INTERVAL;
-            
-            return {
-                id: "T" + String(i + 1).padStart(2, '0'),
-                name: "Metro Train " + (i + 1),
-                status: openJobs > 0 ? 'work' : ['good', 'good', 'good', 'clean'][Math.floor(Math.random() * 4)],
-                mileage: initialMileage,
-                efficiency: (85 + Math.random() * 15).toFixed(1),
-                incidents: Math.floor(Math.random() * 3),
-                certificates: {
-                    rollingStock: { status: 'Valid', expiry: new Date(Date.now() + (30 + Math.random() * 335) * 24 * 60 * 60 * 1000) },
-                    signalling: { status: 'Valid', expiry: new Date(Date.now() + (30 + Math.random() * 335) * 24 * 60 * 60 * 1000) },
-                    telecom: { status: 'Valid', expiry: new Date(Date.now() + (30 + Math.random() * 335) * 24 * 60 * 60 * 1000) },
-                },
-                jobCards: { open: openJobs, closed: Math.floor(Math.random() * 50), criticalJob: openJobs > 0 ? "HVAC Unit Inspection" : "None" },
-                branding: { isBranded: hasBranding, client: hasBranding ? ["BrandA", "BrandB", "BrandC"][Math.floor(Math.random() * 3)] : null, exposureMet: hasBranding ? Math.floor(Math.random() * 100) : 0 },
-                cleaning: { lastCleaned: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000), nextScheduled: "Pending" },
-                stabling: { yard: ['A', 'B', 'C'][Math.floor(Math.random() * 3)], track: Math.ceil(Math.random() * 10) },
-                // NEW FIELD: Simulated AI Prediction for logistics and maintenance planning
-                aiPrediction: {
-                    returnTime: new Date(Date.now() + (Math.random() * 4 + 0.5) * 60 * 60 * 1000), // Return in 0.5 to 4.5 hours
-                    timeToMaintenance: Math.floor(5 + Math.random() * 100) // Days until next major check
-                },
-                // NEW FIELD: Stores the mileage milestone for the next major inspection
-                nextMajorCheckMileage: nextMajorCheck 
-            };
-        });
-    }
-
-    // --- CORE RENDERING FUNCTIONS ---
-    function updateDashboardCounts() {
-        // Count statuses based on current data
-        const operational = trainData.filter(t => t.status === 'good').length;
-        const maintenance = trainData.filter(t => t.status === 'work').length;
-        // Alerts include open jobs OR certificates expiring soon
-        const alerts = trainData.filter(t => t.jobCards.open > 0 || Object.values(t.certificates).some(c => c.status === 'Expires Soon')).length;
-        operationalCountEl.textContent = operational;
-        maintenanceCountEl.textContent = maintenance;
-        alertsCountEl.textContent = alerts;
-    }
-
-    function renderTrains() {
-        grid.innerHTML = "";
-        trainData.forEach(train => {
-            const statusInfo = statuses[train.status];
-            const card = document.createElement("div");
-            // Dynamic styling based on status, including glow effect on hover
-            card.className = `train-card bg-primary-dark rounded-xl border border-border-dark p-5 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:${statusInfo.cardGlowClass}`;
-            
-            card.innerHTML = `
-                <div class="relative">
-                    <div class="aspect-video rounded-lg mb-4 overflow-hidden">
-                        <img src="https://placehold.co/1920x1080/00BFA5/FFFFFF?text=KMRL+Train+Image" 
-                             alt="Kochi Metro Train" 
-                             class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                             onerror="this.src='https://placehold.co/1920x1080/1A202C/A0AEC0?text=Image+Unavailable';"
-                        >
-                    </div>
-                    <span class="absolute top-2 right-2 text-xs font-semibold px-2 py-1 rounded-full bg-${statusInfo.color}-500/20 text-${statusInfo.color}-300">${statusInfo.label}</span>
-                </div>
-                <h3 class="text-lg font-bold text-text-primary truncate">${train.name}</h3>
-                <p class="text-sm text-text-secondary font-medium mb-4">${train.id}</p>
-            `;
-            card.onclick = () => openModal(train);
-            grid.appendChild(card);
-        });
-    }
-    
-    // Simulates an AI sync operation, updating data and ticker
-    function runAiUpdate() {
-        // Disable button and show loading state
-        aiButton.disabled = true;
-        aiButtonText.textContent = 'Syncing...';
-        aiIcon.innerHTML = `<path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>`;
-        aiIcon.classList.add('animate-spin');
+        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         
-        const tickerItems = [];
+        /* Floating Budget Animation */
+        .float-text {
+            position: absolute;
+            animation: floatUp 1.5s ease-out forwards;
+            font-weight: bold;
+            pointer-events: none;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-30px); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col bg-grid">
 
-        // Simulate network/AI processing delay
-        setTimeout(() => {
-            trainData.forEach(t => {
-                t.mileage += Math.floor(Math.random() * 200);
+    <!-- Header -->
+    <header class="h-14 glass-panel flex items-center justify-between px-4 z-20 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600 flex items-center justify-center shadow-lg">
+                <i class="fa-solid fa-building-columns text-amber-400 text-sm"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold tracking-tight text-white">NeuralTrack <span class="text-amber-400 text-xs font-mono">GOV v4.0</span></h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-xs font-mono">
+            <div class="flex items-center gap-3 px-4 py-1.5 bg-slate-800/80 rounded border border-slate-600">
+                <span class="text-slate-400">BUDGET</span>
+                <span class="text-xl font-bold text-white" id="budget-display">$2,500,000</span>
+            </div>
+            <div class="h-8 w-px bg-slate-700"></div>
+            <button onclick="sim.exportLog()" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-file-contract"></i> Audit Log
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Left Control Panel -->
+        <aside class="w-72 glass-panel border-r border-slate-800 flex flex-col z-10 text-xs">
+            <!-- Track Health Dashboard -->
+            <div class="p-4 border-b border-slate-800">
+                <h3 class="font-bold text-slate-400 uppercase tracking-wider mb-3">Infrastructure Health</h3>
+                <div id="health-bars" class="space-y-2">
+                    <!-- JS injects bars here -->
+                </div>
+                <div class="mt-3 text-[10px] text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Click tracks on map to repair ($150k)</span>
+                </div>
+            </div>
+
+            <!-- Dispatch -->
+            <div class="p-4 flex-1 overflow-y-auto">
+                <h3 class="font-bold text-slate-400 uppercase tracking-wider mb-3">Operations</h3>
+                <div class="space-y-2 mb-4">
+                    <button onclick="sim.spawnTrain('highspeed')" class="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-purple-500 rounded text-left flex items-center justify-between group transition-all">
+                        <span><i class="fa-solid fa-bolt text-purple-400 mr-2"></i> High Speed</span>
+                        <span class="text-green-400">+$12k Rev</span>
+                    </button>
+                    <button onclick="sim.spawnTrain('commuter')" class="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded text-left flex items-center justify-between group transition-all">
+                        <span><i class="fa-solid fa-users text-blue-400 mr-2"></i> Commuter</span>
+                        <span class="text-green-400">+$8k Rev</span>
+                    </button>
+                </div>
+
+                <div class="space-y-2">
+                    <h3 class="font-bold text-slate-400 uppercase tracking-wider">Incidents</h3>
+                    <button onclick="sim.triggerEmergency('medical')" class="w-full py-2 bg-red-900/20 border border-red-500/30 hover:bg-red-900/40 text-red-300 rounded text-xs font-bold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-heart-pulse"></i> Medical Event
+                    </button>
+                    <button onclick="sim.triggerEmergency('breakdown')" class="w-full py-2 bg-orange-900/20 border border-orange-500/30 hover:bg-orange-900/40 text-orange-300 rounded text-xs font-bold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Engine Failure
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-2 h-32 border-t border-slate-800 bg-slate-900/50">
+                <canvas id="throughputChart"></canvas>
+            </div>
+        </aside>
+
+        <!-- Center Canvas -->
+        <section class="flex-1 relative bg-slate-900 cursor-crosshair">
+            <div id="canvas-container" class="w-full h-full">
+                <canvas id="simCanvas"></canvas>
                 
-                // Simulate various status changes and events
-                if (Math.random() < 0.1) {
-                    if (t.jobCards.open > 0 && Math.random() < 0.5) {
-                        t.jobCards.open--; t.jobCards.closed++;
-                        if (t.jobCards.open === 0) { t.status = 'good'; t.jobCards.criticalJob = "None"; }
-                        tickerItems.push({train: t.id, message: "Job card closed.", icon: 'FileCheck', color: 'text-green-400'});
-                    } else if (t.mileage > t.nextMajorCheckMileage - 5000 && t.status !== 'work') {
-                         // Check triggered when approaching major check mileage
-                         t.status = 'work';
-                         tickerItems.push({train: t.id, message: "High mileage maintenance triggered.", icon: 'Wrench', color: 'text-yellow-400'});
-                    } else if (t.status === 'good' && Math.random() < 0.2) {
-                         t.status = 'clean';
-                         tickerItems.push({train: t.id, message: "Scheduled for cleaning.", icon: 'Droplets', color: 'text-blue-400'});
-                    }
+                <!-- Tooltip -->
+                <div id="train-tooltip" class="glass-panel p-3 rounded border border-white/10 min-w-[220px] shadow-2xl">
+                    <div class="flex items-center justify-between mb-2 pb-1 border-b border-white/10">
+                        <span id="tt-id" class="font-bold text-white text-sm font-mono">TR-000</span>
+                        <span id="tt-status" class="status-badge status-normal">ON TIME</span>
+                    </div>
+                    <div class="space-y-1 text-xs font-mono text-slate-300">
+                        <div class="flex justify-between"><span>Dest:</span> <span id="tt-dest" class="text-white">Unknown</span></div>
+                        <div class="flex justify-between"><span>Speed:</span> <span id="tt-speed" class="text-blue-400">0 km/h</span></div>
+                        <div id="tt-emergency-row" class="hidden pt-2 mt-1 border-t border-white/10">
+                             <div class="text-red-400 font-bold mb-1">EMERGENCY ACTIVE</div>
+                             <div class="flex justify-between"><span>Reason:</span> <span id="tt-reason" class="text-white">N/A</span></div>
+                             <div class="flex justify-between"><span>Fix Time:</span> <span id="tt-timer" class="text-white">0s</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="track-tooltip" class="absolute hidden glass-panel px-2 py-1 rounded text-xs text-white pointer-events-none z-50 border border-amber-500/50 bg-amber-900/80">
+                    Needs Repair: Click to Fix ($150k)
+                </div>
+
+                <div class="absolute top-4 left-4 pointer-events-none">
+                    <div class="flex items-center gap-2 bg-black/50 px-3 py-1 rounded-full text-xs text-slate-300 border border-white/10">
+                        <div class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                        <span>GOV OPS • V4.0</span>
+                    </div>
+                </div>
+                
+                <!-- Legend -->
+                <div class="absolute top-4 right-4 pointer-events-none glass-panel p-2 rounded flex flex-col gap-1">
+                    <div class="flex items-center gap-2 text-[10px] text-slate-400"><div class="w-3 h-1 bg-slate-600"></div> Healthy Track</div>
+                    <div class="flex items-center gap-2 text-[10px] text-slate-400"><div class="w-3 h-1 bg-amber-700"></div> Damaged (Speed Limit)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel -->
+        <aside class="w-64 glass-panel border-l border-slate-800 flex flex-col z-10">
+            <div class="p-3 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-xs font-bold text-slate-400 uppercase">Manifest</h3>
+                <span class="text-[10px] bg-slate-700 px-2 rounded text-white" id="train-count">0</span>
+            </div>
+            <div class="flex-1 overflow-y-auto p-2 space-y-2" id="train-list"></div>
+            <div class="h-1/3 border-t border-slate-800 flex flex-col">
+                <div class="p-2 bg-slate-900 text-xs font-bold text-slate-500 uppercase border-b border-slate-800">Audit Log</div>
+                <div class="flex-1 overflow-y-auto p-2 font-mono text-[10px] space-y-1" id="log-container"></div>
+            </div>
+        </aside>
+    </main>
+
+<script>
+const CONFIG = {
+    tracks: 4,
+    trackGap: 100,
+    colors: {
+        highspeed: '#a855f7', commuter: '#3b82f6', freight: '#f97316',
+        rail: '#334155', railDark: '#1e293b', 
+        rust: '#b45309', // Degraded track color
+        spark: '#fbbf24'
+    },
+    directions: [1, 1, -1, -1],
+    gov: {
+        repairCost: 150000,
+        revenue: { highspeed: 12000, commuter: 8000, freight: 15000 },
+        degradeRate: 0.05, // health lost per frame per train
+        limitThreshold: 60 // % health where speed limit applies
+    }
+};
+
+class Particle {
+    constructor(x, y, type="spark", text="") {
+        this.x = x; this.y = y; this.type = type; this.text = text;
+        this.vx = (Math.random() - 0.5) * 4; this.vy = (Math.random() - 0.5) * 4;
+        this.life = 1.0;
+        if(type==='text') { this.vx=0; this.vy=-1; this.life=2.0; }
+    }
+    update() { this.x += this.vx; this.y += this.vy; this.life -= 0.03; }
+    draw(ctx) { 
+        ctx.globalAlpha = Math.max(0, this.life);
+        if(this.type === 'text') {
+            ctx.font = 'bold 12px Inter';
+            ctx.fillStyle = this.text.includes('-') ? '#ef4444' : '#10b981';
+            ctx.fillText(this.text, this.x, this.y);
+        } else {
+            ctx.fillStyle = `rgba(251, 191, 36, 1)`; 
+            ctx.fillRect(this.x, this.y, 2, 2); 
+        }
+        ctx.globalAlpha = 1;
+    }
+}
+
+class Train {
+    constructor(id, type, trackIdx, width) {
+        this.id = id; this.type = type; this.trackIdx = trackIdx;
+        this.direction = CONFIG.directions[trackIdx];
+        this.length = type === 'freight' ? 120 : (type === 'highspeed' ? 80 : 60);
+        this.x = this.direction === 1 ? -200 : width + 200;
+        this.yOffset = 0;
+        this.parkState = 'MAIN';
+        
+        this.baseMaxSpeed = (type === 'highspeed' ? 9 : (type === 'commuter' ? 6 : 4)) * this.direction;
+        this.maxSpeed = this.baseMaxSpeed;
+        this.currentSpeed = this.maxSpeed;
+        this.targetSpeed = this.maxSpeed;
+        this.accel = 0.05;
+        
+        this.status = 'NORMAL'; 
+        this.emergencyType = null;
+        this.emergencyReason = "";
+        this.emergencyTimer = 0; 
+        this.refugeTargetX = null;
+        
+        this.destination = `Sector ${Math.floor(Math.random()*9)+1}`;
+        this.selected = false;
+    }
+
+    update(width, trains, stations, trackHealth) {
+        // --- Infrastructure Damage ---
+        if (Math.abs(this.currentSpeed) > 1 && this.parkState === 'MAIN') {
+            // Higher speed = more damage
+            let damage = CONFIG.gov.degradeRate * (Math.abs(this.currentSpeed)/5);
+            // Freight causes double damage
+            if(this.type === 'freight') damage *= 2;
+            
+            trackHealth[this.trackIdx] = Math.max(0, trackHealth[this.trackIdx] - damage);
+        }
+
+        // --- Speed Limit Logic ---
+        let currentTrackHealth = trackHealth[this.trackIdx];
+        let speedFactor = 1.0;
+        if (currentTrackHealth < CONFIG.gov.limitThreshold) {
+            speedFactor = 0.4; // 40% speed if damaged
+        }
+
+        // --- Collision & Logic (Standard v3.2) ---
+        let obstacles = trains.filter(t => t.id !== this.id && t.trackIdx === this.trackIdx && t.parkState !== 'ON_SIDING');
+        let distToNext = Infinity;
+        obstacles.forEach(t => {
+            if (this.direction === t.direction) {
+                if (this.direction === 1 && t.x > this.x) {
+                    let d = t.x - (this.x + this.length);
+                    if (d < distToNext) distToNext = d;
+                } else if (this.direction === -1 && t.x < this.x) {
+                    let d = this.x - (t.x + t.length);
+                    if (d < distToNext) distToNext = d;
                 }
-                
-                // Check certificate expiry
-                Object.values(t.certificates).forEach(cert => {
-                    const daysToExpire = (cert.expiry - Date.now()) / (1000 * 3600 * 24);
-                    if (daysToExpire < 30 && cert.status === 'Valid') {
-                         cert.status = 'Expires Soon';
-                         tickerItems.push({train: t.id, message: `Certificate expires in ${Math.floor(daysToExpire)} days.`, icon: 'ShieldAlert', color: 'text-yellow-400'});
+            } else {
+                 if ((this.direction === 1 && t.x > this.x) || (this.direction === -1 && t.x < this.x)) {
+                    let d = Math.abs(t.x - this.x) - (this.length + t.length);
+                    if (d < distToNext) distToNext = d;
+                }
+            }
+        });
+
+        // Emergency
+        if (this.emergencyType) {
+            if (this.refugeTargetX === null) {
+                let bestDist = Infinity;
+                stations.forEach(s => {
+                    let sx = s.x * width;
+                    if ((this.direction === 1 && sx > this.x) || (this.direction === -1 && sx < this.x)) {
+                        let d = Math.abs(sx - this.x);
+                        if (d < bestDist) { bestDist = d; this.refugeTargetX = sx; }
                     }
                 });
-            });
+                if (this.refugeTargetX === null) {
+                    this.status = 'EMERGENCY HALT';
+                    this.targetSpeed = 0;
+                } else {
+                    this.status = 'SEEKING REFUGE';
+                }
+            }
 
-            // Update ticker content
-            let tickerHTML = '';
-            const allItems = [...tickerItems, ...tickerItems]; // Duplicate for seamless loop animation
-            allItems.forEach(item => {
-                tickerHTML += `<div class="ticker-item">${createIcon(item.icon, {className: `ticker-item-icon ${item.color}`})} <strong>${item.train}:</strong> ${item.message}</div>`;
-            });
-            tickerContentEl.innerHTML = tickerHTML;
+            if (this.status === 'SEEKING REFUGE') {
+                let distToPark = Math.abs(this.refugeTargetX - this.x);
+                if (distToPark < 5) {
+                    this.currentSpeed = 0; this.targetSpeed = 0;
+                    this.parkState = 'MOVING_TO_SIDING'; this.status = 'PARKING...';
+                } else {
+                    this.targetSpeed = (this.baseMaxSpeed * 0.5) * speedFactor;
+                }
+            }
 
-            // Render all updated elements
-            renderTrains();
-            updateDashboardCounts();
-            lastUpdatedEl.textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            if (this.parkState === 'MOVING_TO_SIDING') {
+                let targetOff = (this.trackIdx % 2 === 0) ? -35 : 35;
+                if (Math.abs(this.yOffset - targetOff) > 1) this.yOffset += (targetOff > this.yOffset) ? 1 : -1;
+                else { this.parkState = 'ON_SIDING'; this.status = 'REPAIRING'; }
+            }
 
-            // Restore button state
-            aiButton.disabled = false;
-            aiButtonText.textContent = 'Force AI Sync';
-            aiIcon.classList.remove('animate-spin');
-            aiIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>`;
-        }, 1500);
+            if (this.parkState === 'ON_SIDING') {
+                if (this.emergencyTimer > 0) {
+                    this.emergencyTimer--;
+                    this.status = `REPAIRING (${Math.ceil(this.emergencyTimer/60)}s)`;
+                } else {
+                    this.emergencyType = null; this.parkState = 'MOVING_TO_MAIN'; this.status = 'MERGING';
+                }
+            }
+        } 
+        else if (this.parkState === 'MOVING_TO_MAIN') {
+            if (distToNext < 150) this.status = 'YIELDING';
+            else {
+                this.status = 'MERGING';
+                if (Math.abs(this.yOffset) > 1) this.yOffset += (0 - this.yOffset > 0) ? 1 : -1;
+                else { this.yOffset = 0; this.parkState = 'MAIN'; this.refugeTargetX = null; }
+            }
+        }
+        else {
+            // Normal moving logic with Speed Limits
+            if (distToNext < 80) {
+                this.targetSpeed = 0; this.status = 'HALT';
+            } else if (distToNext < 200) {
+                this.targetSpeed = (this.baseMaxSpeed * 0.5) * speedFactor; this.status = 'BRAKING';
+            } else {
+                this.targetSpeed = this.baseMaxSpeed * speedFactor;
+                if (speedFactor < 1.0) this.status = 'SPEED LIMIT';
+                else this.status = 'NORMAL';
+            }
+        }
+
+        // Physics
+        if (this.parkState === 'MOVING_TO_SIDING' || this.parkState === 'ON_SIDING') {
+            this.currentSpeed = 0;
+        } else {
+            if (Math.abs(this.currentSpeed) < Math.abs(this.targetSpeed)) {
+                this.currentSpeed += this.accel * this.direction;
+            } else if (Math.abs(this.currentSpeed) > Math.abs(this.targetSpeed)) {
+                this.currentSpeed -= (this.accel * 2) * this.direction;
+            }
+        }
+        if(Math.abs(this.currentSpeed) < 0.01) this.currentSpeed = 0;
+        this.x += this.currentSpeed;
+    }
+
+    draw(ctx, y, isNight) {
+        let drawY = y + this.yOffset;
+        if (this.selected) { ctx.shadowBlur = 15; ctx.shadowColor = '#3b82f6'; } else { ctx.shadowBlur = 0; }
+        if (this.emergencyType) ctx.fillStyle = '#ef4444';
+        else if (this.status === 'SPEED LIMIT') ctx.fillStyle = '#f59e0b';
+        else ctx.fillStyle = CONFIG.colors[this.type];
+        
+        ctx.beginPath(); ctx.roundRect(this.x, drawY - 12, this.length, 24, 6); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = isNight ? '#fef3c7' : 'rgba(0,0,0,0.3)';
+        let wins = Math.floor(this.length/15);
+        for(let i=0; i<wins; i++) ctx.fillRect(this.x + 10 + (i*14), drawY-6, 8, 12);
+
+        if (isNight || this.status.includes('REPAIR')) {
+            ctx.fillStyle = this.direction === 1 ? 'rgba(255,255,255,0.6)' : 'rgba(239,68,68,0.6)';
+            if (this.direction === 1) { ctx.beginPath(); ctx.moveTo(this.x+this.length, drawY); ctx.lineTo(this.x+this.length+80, drawY+25); ctx.lineTo(this.x+this.length+80, drawY-25); ctx.fill(); } 
+            else { ctx.beginPath(); ctx.moveTo(this.x, drawY); ctx.lineTo(this.x-80, drawY+25); ctx.lineTo(this.x-80, drawY-25); ctx.fill(); }
+        }
+    }
+}
+
+class Simulator {
+    constructor() {
+        this.canvas = document.getElementById('simCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.trains = [];
+        this.particles = [];
+        this.stations = [
+            { name: "Terminal A", x: 0.15 }, { name: "Central Hub", x: 0.5 }, { name: "Terminal B", x: 0.85 }
+        ];
+        this.trackHealth = [100, 100, 100, 100];
+        this.budget = 2500000;
+        
+        this.isNight = false;
+        this.setupChart();
+        
+        window.addEventListener('resize', () => this.resize());
+        this.canvas.addEventListener('mousemove', e => this.handleMouseMove(e));
+        this.canvas.addEventListener('click', e => this.handleClick(e));
+        this.resize();
+        this.loop();
+        
+        setInterval(() => this.updateUI(), 500);
+        // Slower auto-spawn
+        setInterval(() => { if(Math.random()>0.6) this.spawnTrain(['commuter','freight','highspeed'][Math.floor(Math.random()*3)]) }, 4000);
+    }
+
+    resize() {
+        this.width = this.canvas.parentElement.clientWidth;
+        this.height = this.canvas.parentElement.clientHeight;
+        this.canvas.width = this.width; this.canvas.height = this.height;
+        CONFIG.trackGap = this.height / (CONFIG.tracks + 1);
+    }
+
+    setupChart() {
+        this.chart = new Chart(document.getElementById('throughputChart'), {
+            type: 'line',
+            data: { labels: Array(20).fill(''), datasets: [{ data: Array(20).fill(100), borderColor: '#3b82f6', borderWidth: 1, pointRadius: 0, fill: true, backgroundColor: 'rgba(59,130,246,0.1)' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { x: { display: false }, y: { display: false, min: 50 } }, animation: false }
+        });
+    }
+
+    updateUI() {
+        // Budget
+        document.getElementById('budget-display').innerText = '$' + this.budget.toLocaleString();
+        
+        // Health Bars
+        const healthContainer = document.getElementById('health-bars');
+        healthContainer.innerHTML = '';
+        this.trackHealth.forEach((h, i) => {
+            let color = h > 60 ? 'bg-emerald-500' : (h > 30 ? 'bg-amber-500' : 'bg-red-500');
+            let div = document.createElement('div');
+            div.innerHTML = `
+                <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                    <span>Track ${i+1}</span>
+                    <span>${Math.floor(h)}%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                    <div class="${color} h-full" style="width: ${h}%"></div>
+                </div>
+            `;
+            healthContainer.appendChild(div);
+        });
+    }
+
+    spawnTrain(type) {
+        let track = Math.floor(Math.random()*4);
+        // Cost check (Operating costs?) Let's say dispatching is free, revenue is on arrival/running
+        let t = new Train(`TR-${Math.floor(Math.random()*9000)+1000}`, type, track, this.width);
+        let safe = true;
+        this.trains.forEach(tr => { if (tr.trackIdx === track && Math.abs(tr.x - t.x) < 300) safe = false; });
+        if (safe) { 
+            this.trains.push(t); 
+            this.updateManifest(); 
+            this.addBudget(CONFIG.gov.revenue[type]);
+        }
+    }
+
+    addBudget(amount) {
+        this.budget += amount;
+        let text = amount > 0 ? `+$${(amount/1000).toFixed(1)}k` : `-$${(Math.abs(amount)/1000).toFixed(1)}k`;
+        this.particles.push(new Particle(this.width/2, 50, 'text', text));
+    }
+
+    triggerEmergency(type) {
+        let active = this.trains.filter(t => !t.emergencyType);
+        if(active.length === 0) return;
+        let t = active[Math.floor(Math.random()*active.length)];
+        t.emergencyType = type;
+        t.emergencyReason = type === 'medical' ? "Passenger Issue" : "Engine Failure";
+        t.emergencyTimer = 900; // 15s
+        this.log(`ALERT: ${t.emergencyReason} on ${t.id}.`, 'error');
+    }
+
+    handleMouseMove(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+        
+        // Track Tooltip
+        let hoveredTrack = -1;
+        for(let i=0; i<4; i++) {
+            let ty = CONFIG.trackGap * (i+1);
+            if(Math.abs(y-ty) < 15) hoveredTrack = i;
+        }
+        const trackTT = document.getElementById('track-tooltip');
+        if(hoveredTrack !== -1 && this.trackHealth[hoveredTrack] < 100) {
+            trackTT.style.display = 'block';
+            trackTT.style.left = (x+10)+'px'; trackTT.style.top = (y+10)+'px';
+            trackTT.innerText = `Track ${hoveredTrack+1}: ${Math.floor(this.trackHealth[hoveredTrack])}% (Click to Repair $150k)`;
+        } else {
+            trackTT.style.display = 'none';
+        }
+
+        // Train Tooltip
+        let hovered = this.trains.find(t => {
+            let ty = CONFIG.trackGap * (t.trackIdx + 1);
+            return x >= t.x && x <= t.x + t.length && Math.abs(y - ty - t.yOffset) < 25;
+        });
+        const tt = document.getElementById('train-tooltip');
+        if (hovered) {
+            tt.style.opacity = 1; tt.style.left = x+'px'; tt.style.top = y+'px';
+            document.getElementById('tt-id').innerText = hovered.id;
+            document.getElementById('tt-speed').innerText = Math.round(hovered.currentSpeed*20)+' km/h';
+            document.getElementById('tt-status').innerText = hovered.status;
+        } else {
+            tt.style.opacity = 0;
+        }
+    }
+
+    handleClick(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+        
+        // Check Track Repair
+        for(let i=0; i<4; i++) {
+            let ty = CONFIG.trackGap * (i+1);
+            if(Math.abs(y-ty) < 20) {
+                if(this.trackHealth[i] < 100) {
+                    if(this.budget >= CONFIG.gov.repairCost) {
+                        this.addBudget(-CONFIG.gov.repairCost);
+                        this.trackHealth[i] = 100;
+                        this.log(`Track ${i+1} repaired to 100%`, 'success');
+                        // Spawn "FIXED" text
+                        this.particles.push(new Particle(x, y, 'text', 'REPAIRED'));
+                    } else {
+                        this.log("Insufficient funds for repair!", "error");
+                    }
+                }
+                return;
+            }
+        }
+    }
+
+    log(msg, type) {
+        const box = document.getElementById('log-container');
+        const div = document.createElement('div');
+        div.className = type === 'error' ? 'text-red-400' : (type === 'success' ? 'text-green-400' : 'text-slate-300');
+        div.innerText = `> ${msg}`;
+        box.prepend(div);
     }
     
-    // Opens the detailed modal view
-    function openModal(train) {
-        const statusInfo = statuses[train.status];
-        
-        const getCertStatusClass = (status) => status === 'Expires Soon' ? 'text-yellow-400' : 'text-green-400';
-        
-        const predictedReturnTime = train.aiPrediction.returnTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-        // Calculate the distance remaining for the next major check
-        const distanceRemaining = train.nextMajorCheckMileage - train.mileage;
-        const distanceRemainingText = distanceRemaining.toLocaleString() + ' km';
-        
-        // Define color style using CSS variables for high-mileage alert
-        const distanceColorStyle = distanceRemaining < 5000 ? 'color: var(--accent-red);' : 'color: var(--accent-cyan);';
-
-
-        modalBox.innerHTML = `
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors z-10">
-                ${createIcon('X', { size: 28 })}
-            </button>
-            <div class="p-8">
-                <div class="border-b border-border-dark pb-4 mb-6 flex justify-between items-start">
-                    <div>
-                        <h2 class="text-4xl font-bold text-text-primary mb-1">${train.name}</h2>
-                        <p class="text-lg text-text-secondary font-mono">${train.id} &middot; <span class="text-${statusInfo.color}-400">${statusInfo.label}</span></p>
-                    </div>
-                    <div class="text-right p-3 bg-background-dark rounded-xl border border-border-dark shadow-lg">
-                        <p class="text-sm text-text-secondary">AI Predicted Return Time</p>
-                        <p class="text-xl font-bold" style="color: var(--accent-cyan);">${predictedReturnTime}</p>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 space-y-6">
-                        <h4 class="text-lg font-semibold text-text-primary border-b border-border-dark pb-2 flex items-center" style="color: var(--accent-cyan);">${createIcon('ShieldCheck', {className: 'mr-2', color: 'var(--accent-cyan)'})} 1. Fitness Certificates & Job Status</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="p-4 bg-primary-dark rounded-xl border border-border-dark space-y-2 card-glow-green">
-                                <p class="font-bold text-text-primary flex items-center">${createIcon('Award', {className: 'mr-2 text-green-400'})} Validity Windows</p>
-                                ${Object.entries(train.certificates).map(([key, cert]) => `
-                                    <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span><span class="font-semibold ${getCertStatusClass(cert.status)}">${cert.status} &middot; ${cert.expiry.toLocaleDateString()}</span></div>`).join('')}
-                            </div>
-                            <div class="p-4 bg-primary-dark rounded-xl border border-border-dark space-y-2 card-glow-yellow">
-                                <p class="font-bold text-text-primary flex items-center">${createIcon('FileText', {className: 'mr-2 text-yellow-400'})} IBM Maximo Work Orders</p>
-                                <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">Open Orders</span><span class="font-semibold text-red-400">${train.jobCards.open}</span></div>
-                                <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">Closed Orders (YTD)</span><span class="font-semibold">${train.jobCards.closed}</span></div>
-                                <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">Critical Job Card</span><span class="font-semibold text-red-300">${train.jobCards.criticalJob}</span></div>
-                            </div>
-                        </div>
-
-                        <h4 class="text-lg font-semibold text-text-primary border-b border-border-dark pb-2 pt-4 flex items-center" style="color: var(--accent-cyan);">${createIcon('Gauge', {className: 'mr-2', color: 'var(--accent-cyan)'})} 4. Mileage Balancing</h4>
-                        <div class="p-4 bg-primary-dark rounded-xl border border-border-dark space-y-2">
-                             <div class="flex justify-between items-center text-md"><span class="text-text-secondary">Current Mileage</span><span class="text-xl font-bold text-text-primary">${train.mileage.toLocaleString()} km</span></div>
-                             <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">Operational Efficiency</span><span class="font-semibold">${train.efficiency}%</span></div>
-                             
-                             <div class="flex justify-between items-center text-md pt-2 border-t border-border-dark mt-2">
-                                <span class="text-text-secondary font-medium">Distance Before Next Check (${train.nextMajorCheckMileage.toLocaleString()} km Target)</span>
-                                <span class="text-xl font-bold" style="${distanceColorStyle}">${distanceRemainingText}</span>
-                             </div>
-
-                             <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">Days to Scheduled Major Check (AI)</span><span class="font-semibold text-yellow-400">${train.aiPrediction.timeToMaintenance} days</span></div>
-                        </div>
-
-                    </div>
-
-                    <div class="space-y-6">
-                        <h4 class="text-lg font-semibold text-text-primary border-b border-border-dark pb-2 flex items-center" style="color: var(--accent-cyan);">${createIcon('ParkingCircle', {className: 'mr-2', color: 'var(--accent-cyan)'})} 6. Stabling Geometry (Night Parking Bay)</h4>
-                        <div class="p-4 bg-accent-blue/20 rounded-xl border border-accent-blue space-y-2 shadow-lg">
-                            <p class="text-sm font-medium text-text-secondary">Recommended Night Parking Bay</p>
-                            <p class="text-2xl font-extrabold" style="color: var(--accent-blue);">Yard ${train.stabling.yard}, Track ${train.stabling.track}</p>
-                            <p class="text-xs text-text-secondary">AI calculated to minimize nightly shunting and morning turn-out time.</p>
-                        </div>
-                        
-                        <h4 class="text-lg font-semibold text-text-primary border-b border-border-dark pb-2 flex items-center" style="color: var(--accent-cyan);">${createIcon('SprayCan', {className: 'mr-2', color: 'var(--accent-cyan)'})} 5. Cleaning & Detailing Slots</h4>
-                        <div class="p-4 bg-primary-dark rounded-xl border border-border-dark space-y-2">
-                            <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">Last Deep Cleaned</span><span class="font-semibold">${train.cleaning.lastCleaned.toLocaleDateString()}</span></div>
-                            <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">Next Scheduled Slot</span><span class="font-semibold text-blue-400">Available: 22:00 Bay 4</span></div>
-                            <div class="text-xs text-text-secondary mt-1">Based on bay occupancy and available manpower.</div>
-                        </div>
-
-                        <h4 class="text-lg font-semibold text-text-primary border-b border-border-dark pb-2 flex items-center" style="color: var(--accent-cyan);">${createIcon('Megaphone', {className: 'mr-2', color: 'var(--accent-cyan)'})} 3. Branding Priorities</h4>
-                        ${train.branding.isBranded ? `<div class="p-4 bg-primary-dark rounded-xl border border-border-dark space-y-2 card-glow-blue">
-                            <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">Client Contract</span><span class="font-semibold">${train.branding.client}</span></div>
-                            <div class="flex justify-between items-center text-sm"><span class="text-text-secondary">Exposure Met (Target 100%)</span><span class="font-bold text-lg" style="color: var(--accent-blue);">${train.branding.exposureMet}%</span></div>
-                            <div class="text-xs text-text-secondary mt-1">Exposure hours tracked against contractual commitments.</div>
-                        </div>` : `<div class="p-4 bg-primary-dark rounded-xl border border-border-dark"><p class="text-sm text-text-secondary">Train is currently **unbranded** and available for commercial contracts.</p></div>`}
-                        
-                    </div>
-                </div>
-            </div>`;
-        
-        // Open modal with transition classes
-        modal.classList.remove('hidden');
-        modal.classList.add('flex', 'opacity-100');
-        setTimeout(() => { modalBox.classList.remove('scale-95'); }, 10);
+    updateManifest() {
+        const list = document.getElementById('train-list');
+        document.getElementById('train-count').innerText = this.trains.length;
+        list.innerHTML = '';
+        this.trains.forEach(t => {
+            const div = document.createElement('div');
+            div.className = `p-2 mb-1 bg-slate-800/50 rounded border ${t.emergencyType ? 'border-red-500' : 'border-slate-700'} flex justify-between train-card`;
+            div.innerHTML = `<div><div class="text-xs font-bold text-white">${t.id}</div><div class="text-[10px] text-slate-500">${t.status}</div></div><div class="text-right text-xs text-blue-400">${Math.round(Math.abs(t.currentSpeed)*20)} km/h</div>`;
+            list.appendChild(div);
+        });
     }
 
-    // Closes the modal with a smooth transition
-    function closeModal() {
-        modal.classList.add('opacity-0');
-        modalBox.classList.add('scale-95');
-        setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex', 'opacity-100'); }, 300);
-    }
+    loop() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        if (this.isNight) { this.ctx.fillStyle = 'rgba(10, 15, 30, 0.85)'; this.ctx.fillRect(0, 0, this.width, this.height); }
 
-    // --- INITIALIZATION & EVENT LISTENERS ---
-    document.addEventListener('DOMContentLoaded', () => {
-        generateInitialData();
-        runAiUpdate(); // Run once on load to populate everything
-        // Schedule periodic AI sync updates
-        setInterval(runAiUpdate, 20000); 
-    });
+        // Draw Stations
+        this.stations.forEach(s => {
+            let x = s.x * this.width;
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'; this.ctx.fillRect(x - 80, 0, 160, this.height);
+            
+            // Siding Visuals
+            for(let i=0; i<CONFIG.tracks; i++) {
+                let y = CONFIG.trackGap * (i+1);
+                let offset = (i % 2 === 0) ? -35 : 35;
+                this.ctx.beginPath(); this.ctx.strokeStyle = '#475569'; this.ctx.lineWidth = 2;
+                this.ctx.moveTo(x - 120, y); this.ctx.quadraticCurveTo(x - 100, y + offset, x - 60, y + offset);
+                this.ctx.lineTo(x + 60, y + offset); this.ctx.quadraticCurveTo(x + 100, y + offset, x + 120, y);
+                this.ctx.stroke();
+            }
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'; this.ctx.font = 'bold 12px Inter'; this.ctx.fillText(s.name.toUpperCase(), x - 40, 20);
+        });
 
-    // Close modal on Escape key press
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-            closeModal();
+        // Draw Tracks & Signals
+        for(let i=0; i<CONFIG.tracks; i++) {
+            let y = CONFIG.trackGap * (i + 1);
+            let h = this.trackHealth[i];
+            
+            // Track Color Interpolation (Blue -> Rust)
+            // Simple switch for now
+            let trackColor = h > 60 ? (this.isNight ? CONFIG.colors.railDark : CONFIG.colors.rail) : CONFIG.colors.rust;
+            
+            this.ctx.beginPath(); this.ctx.strokeStyle = trackColor; this.ctx.lineWidth = 4; 
+            this.ctx.moveTo(0, y); this.ctx.lineTo(this.width, y); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.strokeStyle = '#1e293b'; this.ctx.lineWidth = 2;
+            for(let tx=0; tx<this.width; tx+=20) { this.ctx.moveTo(tx, y-5); this.ctx.lineTo(tx, y+5); }
+            this.ctx.stroke();
+
+            // Speed Limit Signs
+            if (h < 60) {
+                for(let sx=50; sx<this.width; sx+=400) {
+                    this.ctx.fillStyle = '#f59e0b'; this.ctx.beginPath(); this.ctx.arc(sx, y-20, 8, 0, Math.PI*2); this.ctx.fill();
+                    this.ctx.fillStyle = '#000'; this.ctx.font = 'bold 8px Inter'; this.ctx.fillText('SLOW', sx-10, y-18);
+                }
+            }
+            
+            // Signals
+            let dir = CONFIG.directions[i];
+            for(let sx=100; sx<this.width; sx+=300) {
+                let state = 'GREEN';
+                this.trains.forEach(t => {
+                    if (t.trackIdx === i && t.parkState !== 'ON_SIDING') {
+                         if ((dir === 1 && t.x > sx && t.x < sx+300) || (dir === -1 && t.x < sx && t.x > sx-300)) state = 'RED';
+                    }
+                });
+                this.ctx.fillStyle = state === 'RED' ? '#ef4444' : '#10b981';
+                this.ctx.beginPath(); this.ctx.arc(sx + 2, y - 27, 4, 0, Math.PI*2); this.ctx.fill();
+            }
         }
-    });
-  </script>
+
+        let remove = [];
+        this.trains.forEach((t, i) => {
+            t.update(this.width, this.trains, this.stations, this.trackHealth);
+            t.draw(this.ctx, CONFIG.trackGap * (t.trackIdx + 1), this.isNight);
+            if (t.x > this.width + 100 || t.x < -200) remove.push(i);
+        });
+        for(let i=remove.length-1; i>=0; i--) this.trains.splice(remove[i], 1);
+        if(remove.length > 0 || Math.random() > 0.9) this.updateManifest();
+
+        this.particles.forEach((p,i) => { p.update(); p.draw(this.ctx); if(p.life<=0) this.particles.splice(i,1); });
+
+        requestAnimationFrame(() => this.loop());
+    }
+}
+
+const sim = new Simulator();
+</script>
 </body>
 </html>
